@@ -1,0 +1,18 @@
+{
+  "id": "2026-01-15-ready-fragment",
+  "title": "A Ready Fragment",
+  "summary": "A clean, fully described fragment used to show a high readiness score.",
+  "license": "CC-BY",
+  "canonical_url": "https://example.com/articles/ready-fragment",
+  "access": {
+    "policy": "free"
+  },
+  "sources": [
+    {
+      "kind": "article",
+      "title": "Original article",
+      "url": "https://example.com/articles/ready-fragment"
+    }
+  ],
+  "relations": []
+}

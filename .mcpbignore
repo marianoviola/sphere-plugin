@@ -1,0 +1,22 @@
+# The server is a single self-contained esbuild bundle (server/index.js), so the
+# bundle needs no node_modules and no TypeScript sources at runtime. Ship only the
+# manifest, the built server, docs, the license, and the sample fragments.
+node_modules/
+src/
+tests/
+scripts/
+dist/
+.git/
+.github/
+coverage/
+*.mcpb
+*.map
+tsconfig.json
+vitest.config.ts
+package-lock.json
+.gitignore
+.mcpbignore
+.dev.vars
+.dev.vars.*
+.env
+.env.*

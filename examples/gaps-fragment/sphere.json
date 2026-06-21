@@ -1,0 +1,14 @@
+{
+  "id": "2026-01-16-gaps-fragment",
+  "title": "A Fragment With Gaps",
+  "license": "unknown",
+  "access": {
+    "policy": "free"
+  },
+  "media": [
+    { "file": "media/diagram.png" }
+  ],
+  "data": [
+    { "file": "data/table.csv" }
+  ]
+}

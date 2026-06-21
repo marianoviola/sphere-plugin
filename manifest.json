@@ -1,0 +1,57 @@
+{
+  "manifest_version": "0.3",
+  "name": "sphere-plugin",
+  "display_name": "Sphere",
+  "version": "1.0.0",
+  "description": "Fragment Intelligence and authoring for agent-readable content, plus read-only tools for your own Sphere Node.",
+  "long_description": "Sphere is a local Claude desktop extension. Four local tools validate fragments, analyze readiness, generate reports, and scaffold new fragments from your files, with zero configuration and no network access. Three read-only client tools query the owner face of a Sphere Node you run yourself, using a URL and token you provide. The plugin hosts nothing and stores nothing.",
+  "author": {
+    "name": "Mariano Viola"
+  },
+  "license": "Apache-2.0",
+  "server": {
+    "type": "node",
+    "entry_point": "server/index.js",
+    "mcp_config": {
+      "command": "node",
+      "args": ["${__dirname}/server/index.js"],
+      "env": {
+        "SPHERE_NODE_URL": "${user_config.sphere_node_url}",
+        "SPHERE_NODE_TOKEN": "${user_config.sphere_node_token}"
+      }
+    }
+  },
+  "tools": [
+    { "name": "validate_fragment", "description": "Check a fragment's structural validity against the Sphere fragment schema." },
+    { "name": "analyze_fragment_readiness", "description": "Report advisory readiness gaps that are not hard errors, with severities and suggestions." },
+    { "name": "generate_fragment_report", "description": "Combine validation and readiness into one readable report for a fragment or a directory." },
+    { "name": "prepare_fragment", "description": "Scaffold and write a new fragment (sphere.json + content.md) from provided fields." },
+    { "name": "get_publisher_summary", "description": "Read-only: GET /owner/summary from your configured Sphere Node." },
+    { "name": "get_fragment_usage", "description": "Read-only: GET /owner/fragments/{id}/usage from your configured Sphere Node." },
+    { "name": "get_payment_status", "description": "Read-only: GET /owner/payments from your configured Sphere Node." }
+  ],
+  "user_config": {
+    "sphere_node_url": {
+      "type": "string",
+      "title": "Sphere Node URL",
+      "description": "Base URL of your own Sphere Node, for example https://node.example.com. Optional: leave blank to use only the local fragment tools.",
+      "required": false
+    },
+    "sphere_node_token": {
+      "type": "string",
+      "title": "Sphere Node Token",
+      "description": "Owner bearer token for your Sphere Node. Stored in your OS keychain. Optional: leave blank to use only the local fragment tools.",
+      "sensitive": true,
+      "required": false
+    }
+  },
+  "privacy_policies": [
+    "https://github.com/marianoviola/sphere-plugin/blob/main/README.md#privacy"
+  ],
+  "keywords": ["sphere", "fragment", "agent-readable", "publishing", "mcp"],
+  "compatibility": {
+    "runtimes": {
+      "node": ">=18"
+    }
+  }
+}
