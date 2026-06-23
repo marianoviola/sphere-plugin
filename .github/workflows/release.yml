@@ -1,0 +1,99 @@
+name: Release plugin bundle
+
+# Every version tag (v*) builds the MCP server, packs the MCPB bundle, and
+# publishes a GitHub Release with the bundle attached under a stable asset name.
+# The site links the bundle via the stable "latest" URLs, so the asset name must
+# not change between versions:
+#   https://github.com/marianoviola/sphere-plugin/releases/latest
+#   https://github.com/marianoviola/sphere-plugin/releases/latest/download/sphere-plugin.mcpb
+#
+# Versioning: manifest.json is the single source of truth for the version. A real
+# release tag must be v<manifest.version> (manifest 1.2.0 -> tag v1.2.0). The
+# "Check tag matches manifest version" step enforces this for release tags and
+# skips the check for pre-release / throwaway tags (anything with a hyphen, e.g.
+# v0.0.1-test) so the workflow can be dry-run without bumping the manifest.
+
+on:
+  push:
+    tags:
+      - "v*"
+
+# Needed to create the release and upload the asset.
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check tag matches manifest version
+        run: |
+          set -euo pipefail
+          TAG="${GITHUB_REF_NAME}"
+          TAG_VERSION="${TAG#v}"
+          MANIFEST_VERSION="$(node -p "require('./manifest.json').version")"
+          echo "Tag:               $TAG (version $TAG_VERSION)"
+          echo "manifest.json:     $MANIFEST_VERSION"
+          if [[ "$TAG_VERSION" == *-* ]]; then
+            echo "::notice::Pre-release/test tag '$TAG' - skipping strict version match against manifest ($MANIFEST_VERSION)."
+          elif [[ "$TAG_VERSION" != "$MANIFEST_VERSION" ]]; then
+            echo "::error::Tag version '$TAG_VERSION' does not match manifest.json version '$MANIFEST_VERSION'. Bump manifest.json and retag."
+            exit 1
+          else
+            echo "Tag matches manifest version."
+          fi
+
+      # Build-time safety: do not ship a bundle that does not typecheck or pass tests.
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Test
+        run: npm test
+
+      # Build the MCP server into the single self-contained bundle (server/index.js).
+      - name: Build server bundle
+        run: npm run build
+
+      # Gate 1: the manifest must be valid before we attempt to pack or release.
+      - name: Validate manifest
+        run: npm run validate-manifest
+
+      # Pack the already-built bundle into a stable artifact name. Calling mcpb
+      # directly (rather than `npm run pack`) reuses the build above instead of
+      # rebuilding. Output path -> asset name "sphere-plugin.mcpb".
+      - name: Pack MCPB bundle
+        run: npx mcpb pack . dist/sphere-plugin.mcpb
+
+      # Gate 2: fail loudly if the bundle did not materialize, so a broken or empty
+      # build can never reach a published release.
+      - name: Verify bundle exists
+        run: |
+          set -euo pipefail
+          BUNDLE="dist/sphere-plugin.mcpb"
+          if [[ ! -s "$BUNDLE" ]]; then
+            echo "::error::Expected $BUNDLE to exist and be non-empty after pack."
+            exit 1
+          fi
+          ls -la "$BUNDLE"
+
+      - name: Create GitHub Release and upload bundle
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release create "${GITHUB_REF_NAME}" \
+            "dist/sphere-plugin.mcpb" \
+            --title "${GITHUB_REF_NAME}" \
+            --generate-notes
