@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/icon.png" alt="Sphere" width="120" height="120">
+</p>
+
 # Sphere plugin
 
 Status: v1, work in progress.
