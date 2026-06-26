@@ -4,7 +4,7 @@
 
 # Sphere plugin
 
-Status: v1, work in progress.
+Status: v1.
 
 The Sphere plugin is a local Claude desktop extension (MCPB) for working with
 agent-readable content "fragments." It runs on your machine over stdio. There is
