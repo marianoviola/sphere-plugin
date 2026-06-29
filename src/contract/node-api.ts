@@ -53,6 +53,23 @@ export interface PaymentStatus {
   total: number;
 }
 
+/** External provenance kinds a fragment may draw on. */
+export type SourceType = "book" | "article" | "paper" | "video" | "webpage" | "dataset" | "other";
+
+/**
+ * A typed EXTERNAL source: a book, article, paper, video, page, or dataset a
+ * fragment draws on. Provenance is legitimacy, so this is part of the contract.
+ * NOT the internal document a fragment was generated from (build lineage).
+ */
+export interface SourceRef {
+  type: SourceType;
+  title: string;
+  author?: string;
+  url?: string;
+  date?: string;
+  note?: string;
+}
+
 /** Minimal manifest shape the plugin reads for validation and readiness. */
 export interface FragmentManifest {
   id: string;
@@ -67,7 +84,7 @@ export interface FragmentManifest {
     payment?: { profile: string; method: string; endpoint: string; [k: string]: unknown };
     [k: string]: unknown;
   };
-  sources?: unknown[];
+  sources?: SourceRef[];
   relations?: unknown[];
   // Optional fields the readiness checks look for (not required by the schema).
   canonical_url?: string;

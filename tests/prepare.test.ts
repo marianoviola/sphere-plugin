@@ -14,7 +14,7 @@ describe("prepare_fragment", () => {
       content: "Some body text about the topic.",
       today: "2026-02-01",
       canonicalUrl: "https://example.com/x",
-      sources: [{ kind: "note", title: "n" }],
+      sources: [{ type: "article", title: "Source article", author: "B. Author", url: "https://example.com/src" }],
     });
 
     expect(result.id).toBe("2026-02-01-my-first-fragment");

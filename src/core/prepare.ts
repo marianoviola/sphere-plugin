@@ -4,7 +4,7 @@
 
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import type { AccessPolicy, FragmentManifest } from "../contract/node-api";
+import type { AccessPolicy, FragmentManifest, SourceRef } from "../contract/node-api";
 import { validateManifest, type ValidationResult } from "./validate";
 
 export interface PrepareInput {
@@ -19,7 +19,8 @@ export interface PrepareInput {
   currency?: string;
   payment?: { profile: string; method: string; endpoint: string };
   canonicalUrl?: string;
-  sources?: unknown[];
+  /** Typed external provenance copied through to the fragment manifest. */
+  sources?: SourceRef[];
   /** yyyy-mm-dd; defaults to today. Used to derive the id when none is given. */
   today?: string;
 }

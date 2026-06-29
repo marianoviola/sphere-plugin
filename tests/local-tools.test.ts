@@ -39,7 +39,7 @@ describe("analyze_fragment_readiness", () => {
 
   it("flags advisory gaps for a gappy (but valid) fragment", async () => {
     const out = await analyzeReadinessTool(GAPS);
-    expect(out.text).toMatch(/No sources/);
+    expect(out.text).toMatch(/external sources/i);
     expect(out.text).toMatch(/unclear/i);
     expect(out.text).toMatch(/canonical_url/);
     expect(out.text).toMatch(/media item/);

@@ -50,13 +50,15 @@ function imagesWithEmptyAlt(content: string | null): number {
 export function analyzeReadiness(manifest: FragmentManifest, content: string | null): ReadinessResult {
   const findings: ReadinessFinding[] = [];
 
-  // Sources / provenance.
+  // External provenance. sources[] is typed external references (books, articles,
+  // papers, videos, pages, datasets) — legitimacy, not internal build lineage.
   if (!isNonEmptyArray(manifest.sources)) {
     findings.push({
       code: "missing_sources",
-      severity: "medium",
-      message: "No sources are declared.",
-      suggestion: "Add at least one entry to sources[] describing where this content came from.",
+      severity: "low",
+      message: "No external sources are declared.",
+      suggestion:
+        "If this fragment draws on external works, add typed entries to sources[] (type, title, optional author/url/date/note). Leave empty for original content.",
     });
   }
 

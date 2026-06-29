@@ -9,9 +9,11 @@
   },
   "sources": [
     {
-      "kind": "article",
+      "type": "article",
       "title": "Original article",
-      "url": "https://example.com/articles/ready-fragment"
+      "author": "A. Writer",
+      "url": "https://example.com/articles/ready-fragment",
+      "date": "2026-01-10"
     }
   ],
   "relations": []
