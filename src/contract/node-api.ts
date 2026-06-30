@@ -70,6 +70,19 @@ export interface SourceRef {
   note?: string;
 }
 
+/**
+ * A typed edge to another fragment. `type` is a short, open relation kind
+ * (related, continues, cites, responds-to, ...). `target` is a CANONICAL
+ * fragment reference: a same-node id (yyyy-mm-dd-slug) or an absolute external
+ * fragment URL ({node_base}/fragments/{id}). The reference scheme is canonical
+ * in sphere-node (spec/node-api.md); this plugin never redefines it.
+ */
+export interface RelationEdge {
+  type: string;
+  target: string;
+  [k: string]: unknown;
+}
+
 /** Minimal manifest shape the plugin reads for validation and readiness. */
 export interface FragmentManifest {
   id: string;
@@ -85,7 +98,7 @@ export interface FragmentManifest {
     [k: string]: unknown;
   };
   sources?: SourceRef[];
-  relations?: unknown[];
+  relations?: RelationEdge[];
   // Optional fields the readiness checks look for (not required by the schema).
   canonical_url?: string;
   media?: unknown[];

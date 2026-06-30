@@ -4,7 +4,7 @@
 
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import type { AccessPolicy, FragmentManifest, SourceRef } from "../contract/node-api";
+import type { AccessPolicy, FragmentManifest, RelationEdge, SourceRef } from "../contract/node-api";
 import { validateManifest, type ValidationResult } from "./validate";
 
 export interface PrepareInput {
@@ -21,6 +21,13 @@ export interface PrepareInput {
   canonicalUrl?: string;
   /** Typed external provenance copied through to the fragment manifest. */
   sources?: SourceRef[];
+  /**
+   * Typed edges to other fragments, declared in the source frontmatter and
+   * copied through unchanged. Each edge is { type, target } where target is a
+   * canonical fragment reference (a same-node id or an absolute external
+   * fragment URL). Validated as part of the written manifest.
+   */
+  relations?: RelationEdge[];
   /** yyyy-mm-dd; defaults to today. Used to derive the id when none is given. */
   today?: string;
 }
@@ -62,7 +69,7 @@ export function buildManifest(input: PrepareInput): FragmentManifest {
     license: input.license ?? "CC-BY",
     access,
     sources: input.sources ?? [],
-    relations: [],
+    relations: input.relations ?? [],
   };
   if (input.summary) manifest.summary = input.summary;
   if (input.canonicalUrl) manifest.canonical_url = input.canonicalUrl;

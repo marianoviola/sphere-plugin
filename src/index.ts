@@ -99,6 +99,14 @@ server.registerTool(
       price_per_access: z.number().optional(),
       currency: z.string().optional(),
       canonical_url: z.string().optional(),
+      relations: z
+        .array(z.object({ type: z.string(), target: z.string() }).passthrough())
+        .optional()
+        .describe(
+          "Typed edges to other fragments, from the source frontmatter. Each edge is " +
+            "{ type, target } where target is a canonical fragment reference: a same-node id " +
+            "(yyyy-mm-dd-slug) or an absolute external fragment URL ({node_base}/fragments/{id}).",
+        ),
     },
     annotations: { readOnlyHint: false, destructiveHint: true, openWorldHint: false },
   },
@@ -115,6 +123,7 @@ server.registerTool(
         pricePerAccess: args.price_per_access,
         currency: args.currency,
         canonicalUrl: args.canonical_url,
+        relations: args.relations,
       }),
     ),
 );
