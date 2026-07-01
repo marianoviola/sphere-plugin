@@ -91,4 +91,4 @@ truth for the contract; this plugin consumes it and does not redefine it.
 ## License
 
 The Sphere plugin source code is licensed under the
-[Apache License 2.0](LICENSE).
+[MIT License](LICENSE).

@@ -7,9 +7,10 @@
   "description": "Fragment Intelligence and authoring for agent-readable content, plus read-only tools for your own Sphere Node.",
   "long_description": "Sphere is a local Claude desktop extension. Four local tools validate fragments, analyze readiness, generate reports, and scaffold new fragments from your files, with zero configuration and no network access. Three read-only client tools query the owner face of a Sphere Node you run yourself, using a URL and token you provide. The plugin hosts nothing and stores nothing.",
   "author": {
-    "name": "Mariano Viola"
+    "name": "Mariano Viola",
+    "url": "https://github.com/marianoviola"
   },
-  "license": "Apache-2.0",
+  "license": "MIT",
   "server": {
     "type": "node",
     "entry_point": "server/index.js",

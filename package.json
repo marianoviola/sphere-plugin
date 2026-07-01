@@ -4,7 +4,7 @@
   "private": false,
   "description": "Local Claude desktop extension (MCPB) for Sphere Fragment Intelligence and authoring, plus read-only client tools for a Sphere Node.",
   "type": "module",
-  "license": "Apache-2.0",
+  "license": "MIT",
   "engines": {
     "node": ">=18"
   },
