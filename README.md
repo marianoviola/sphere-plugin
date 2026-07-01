@@ -66,6 +66,7 @@ you configure, authenticated with the token you provide.
   URL taken from fragment content, tool arguments, or any other source.
 - Your token is stored in the OS keychain by Claude Desktop and is sent only as a
   bearer token to your own Node.
+- Questions, support, or privacy requests: email hello@sphere.pub.
 
 ## Build and package
 
