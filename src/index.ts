@@ -1,6 +1,7 @@
 // Sphere plugin: a local MCP server over stdio. It exposes four local fragment
-// tools (zero config, no network) and three read-only client tools that query the
-// single configured Sphere Node. It hosts nothing and stores nothing.
+// tools (zero config, no network) and four client tools that talk to the single
+// configured Sphere Node: three read-only owner reads and one guided publish
+// (PUT). It hosts nothing and stores nothing.
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
@@ -15,7 +16,12 @@ import {
   prepareFragmentTool,
   type ToolText,
 } from "./tools/local";
-import { publisherSummaryTool, paymentStatusTool, fragmentUsageTool } from "./tools/node";
+import {
+  publisherSummaryTool,
+  paymentStatusTool,
+  fragmentUsageTool,
+  publishFragmentTool,
+} from "./tools/node";
 
 function toResult(out: ToolText) {
   return {
@@ -169,6 +175,24 @@ server.registerTool(
     annotations: { readOnlyHint: true, openWorldHint: true },
   },
   async () => toResult(await paymentStatusTool(nodeDeps())),
+);
+
+server.registerTool(
+  "publish_fragment",
+  {
+    title: "Publish fragment to your Sphere Node",
+    description:
+      "Read a prepared local fragment, validate it, then publish it to your configured Sphere " +
+      "Node (PUT /owner/fragments/{id}). Refuses to publish a structurally invalid fragment and " +
+      "reports readiness gaps. Recommended flow: prepare_fragment, validate_fragment, " +
+      "analyze_fragment_readiness, then publish_fragment. If the Node URL or token is not set, " +
+      "explains how to configure it instead of failing.",
+    inputSchema: {
+      path: z.string().describe("Path to a prepared fragment directory or its sphere.json."),
+    },
+    annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: true, openWorldHint: true },
+  },
+  async ({ path }) => toResult(await publishFragmentTool(nodeDeps(), path)),
 );
 
 async function main(): Promise<void> {

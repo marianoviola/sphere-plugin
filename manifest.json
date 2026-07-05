@@ -5,7 +5,7 @@
   "version": "1.0.0",
   "icon": "assets/icon.png",
   "description": "Fragment Intelligence and authoring for agent-readable content, plus read-only tools for your own Sphere Node.",
-  "long_description": "Sphere is a local Claude desktop extension. Four local tools validate fragments, analyze readiness, generate reports, and scaffold new fragments from your files, with zero configuration and no network access. Three read-only client tools query the owner face of a Sphere Node you run yourself, using a URL and token you provide. The plugin hosts nothing and stores nothing.",
+  "long_description": "Sphere is a local Claude desktop extension. Four local tools validate fragments, analyze readiness, generate reports, and scaffold new fragments from your files, with zero configuration and no network access. Client tools talk to a Sphere Node you run yourself, using a URL and token you provide: three read-only owner reads, plus a guided publish that validates a prepared fragment before sending it to your node. The plugin hosts nothing and stores nothing.",
   "author": {
     "name": "Mariano Viola",
     "url": "https://github.com/marianoviola"
@@ -30,7 +30,8 @@
     { "name": "prepare_fragment", "description": "Scaffold and write a new fragment (sphere.json + content.md) from provided fields." },
     { "name": "get_publisher_summary", "description": "Read-only: GET /owner/summary from your configured Sphere Node." },
     { "name": "get_fragment_usage", "description": "Read-only: GET /owner/fragments/{id}/usage from your configured Sphere Node." },
-    { "name": "get_payment_status", "description": "Read-only: GET /owner/payments from your configured Sphere Node." }
+    { "name": "get_payment_status", "description": "Read-only: GET /owner/payments from your configured Sphere Node." },
+    { "name": "publish_fragment", "description": "Validate a prepared local fragment, then publish it to your configured Sphere Node (PUT /owner/fragments/{id})." }
   ],
   "user_config": {
     "sphere_node_url": {

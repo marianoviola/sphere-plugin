@@ -49,16 +49,28 @@ export function buildOwnerUrl(base: string, path: string): URL {
   return target;
 }
 
-async function callOwner(deps: NodeClientDeps, path: string): Promise<NodeCallResult> {
+/** Reused wording so reads and writes report a rejected token identically. */
+const TOKEN_REJECTED = "The Sphere Node rejected the token (401). Check the Sphere Node Token in settings.";
+const NOT_JSON = "The Sphere Node returned a response that was not valid JSON.";
+
+/**
+ * Resolve the same-origin owner URL, or a NodeCallResult that the caller should
+ * return as-is (unconfigured, or an off-origin refusal). Shared by every owner
+ * call so the "only the configured node" guarantee has exactly one implementation.
+ */
+function resolveOwnerTarget(deps: NodeClientDeps, path: string): URL | NodeCallResult {
   const unconfigured = configMessage(deps.config);
   if (unconfigured) return { kind: "unconfigured", message: unconfigured };
-
-  let target: URL;
   try {
-    target = buildOwnerUrl(deps.config.url as string, path);
+    return buildOwnerUrl(deps.config.url as string, path);
   } catch (e) {
     return { kind: "error", message: e instanceof Error ? e.message : String(e) };
   }
+}
+
+async function callOwner(deps: NodeClientDeps, path: string): Promise<NodeCallResult> {
+  const target = resolveOwnerTarget(deps, path);
+  if (!(target instanceof URL)) return target;
 
   let response: Response;
   try {
@@ -74,7 +86,7 @@ async function callOwner(deps: NodeClientDeps, path: string): Promise<NodeCallRe
   }
 
   if (response.status === 401) {
-    return { kind: "error", message: "The Sphere Node rejected the token (401). Check the Sphere Node Token in settings." };
+    return { kind: "error", message: TOKEN_REJECTED };
   }
   if (!response.ok) {
     return { kind: "error", message: `The Sphere Node returned HTTP ${response.status}.` };
@@ -84,8 +96,106 @@ async function callOwner(deps: NodeClientDeps, path: string): Promise<NodeCallRe
     const data = await response.json();
     return { kind: "ok", data };
   } catch {
-    return { kind: "error", message: "The Sphere Node returned a response that was not valid JSON." };
+    return { kind: "error", message: NOT_JSON };
   }
+}
+
+/** Parse a JSON response body, or null if it was not valid JSON. */
+async function readJson(response: Response): Promise<unknown | null> {
+  try {
+    return await response.json();
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Owner write. A PUT with a JSON body, under the SAME same-origin guard and the
+ * SAME token as the reads. Non-2xx statuses are mapped to specific messages so
+ * the node's own reason (a 422 validation list, a 400 id mismatch, a 401 token
+ * rejection) reaches the user rather than a bare status code.
+ */
+async function callOwnerWrite(deps: NodeClientDeps, path: string, body: unknown): Promise<NodeCallResult> {
+  const target = resolveOwnerTarget(deps, path);
+  if (!(target instanceof URL)) return target;
+
+  let response: Response;
+  try {
+    response = await deps.fetchFn(target.toString(), {
+      method: "PUT",
+      headers: {
+        authorization: `Bearer ${deps.config.token}`,
+        "content-type": "application/json",
+        accept: "application/json",
+      },
+      body: JSON.stringify(body),
+    });
+  } catch (e) {
+    return { kind: "error", message: `Could not reach the Sphere Node: ${e instanceof Error ? e.message : String(e)}` };
+  }
+
+  if (response.ok) {
+    const data = await readJson(response);
+    if (data === null) return { kind: "error", message: NOT_JSON };
+    return { kind: "ok", data };
+  }
+
+  if (response.status === 401) {
+    return { kind: "error", message: TOKEN_REJECTED };
+  }
+
+  if (response.status === 422) {
+    // The node returns { errors: [...] }; surface the specific reasons.
+    const data = await readJson(response);
+    const errors = extractErrors(data);
+    if (errors.length > 0) {
+      return { kind: "error", message: `The node rejected the fragment:\n${errors.map((e) => `- ${e}`).join("\n")}` };
+    }
+    return { kind: "error", message: "The node rejected the fragment (422), but returned no error details." };
+  }
+
+  if (response.status === 400) {
+    // Most commonly the manifest id does not match the path id.
+    const data = await readJson(response);
+    const detail = messageFrom(data);
+    return {
+      kind: "error",
+      message: detail
+        ? `The node rejected the request (400): ${detail}`
+        : "The node rejected the request (400). The most likely cause is the manifest id not matching the fragment id.",
+    };
+  }
+
+  return { kind: "error", message: `The Sphere Node returned HTTP ${response.status}.` };
+}
+
+/** Pull a string[] out of a `{ errors }` body, tolerating non-string entries. */
+function extractErrors(data: unknown): string[] {
+  if (!data || typeof data !== "object") return [];
+  const errors = (data as { errors?: unknown }).errors;
+  if (!Array.isArray(errors)) return [];
+  return errors.map((e) => (typeof e === "string" ? e : JSON.stringify(e)));
+}
+
+/** Pull a human-readable detail out of an `{ error }` body, if present. */
+function messageFrom(data: unknown): string | null {
+  if (!data || typeof data !== "object") return null;
+  const err = (data as { error?: unknown }).error;
+  return typeof err === "string" ? err : null;
+}
+
+/**
+ * Publish (upsert) a prepared fragment to the owner write endpoint.
+ * TODO(media): step 1's endpoint accepts an optional `media[]`, but this step
+ * publishes content.md + manifest only. Wire media through once the plugin can
+ * read media files from the fragment directory.
+ */
+export function publishFragment(
+  deps: NodeClientDeps,
+  fragment: { id: string; manifest: unknown; content: string | null },
+): Promise<NodeCallResult> {
+  const body = { manifest: fragment.manifest, content: fragment.content ?? "" };
+  return callOwnerWrite(deps, `/owner/fragments/${encodeURIComponent(fragment.id)}`, body);
 }
 
 export function getPublisherSummary(deps: NodeClientDeps): Promise<NodeCallResult> {
