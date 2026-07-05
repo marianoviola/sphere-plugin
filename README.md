@@ -29,17 +29,45 @@ These operate on fragment files on your disk and work out of the box.
 - `prepare_fragment` - scaffold and write a new fragment (sphere.json +
   content.md) from fields and Markdown body you provide, then validate it.
 
-## Node tools (read-only, your own Sphere Node)
+## Node tools (your own Sphere Node)
 
-These query the owner face of a Sphere Node that you run yourself. They are
-read-only and they only ever call the single Node URL you configure.
+These talk to the owner face of a Sphere Node that you run yourself. They only
+ever call the single Node URL you configure.
+
+Read-only:
 
 - `get_publisher_summary` - GET /owner/summary
 - `get_fragment_usage` - GET /owner/fragments/{id}/usage
 - `get_payment_status` - GET /owner/payments
 
+Write:
+
+- `publish_fragment` - validate a prepared local fragment, then publish it to
+  your node (PUT /owner/fragments/{id}). It refuses to publish a structurally
+  invalid fragment.
+
 If you have not set a Node URL and token, these tools do not fail. They explain
 how to configure them, and the local tools keep working regardless.
+
+## Publishing
+
+Publishing is a guided flow. The plugin stays a thin client: it sends only to
+the node you configured, holds no Cloudflare or hosting credentials, and refuses
+to push a structurally broken fragment.
+
+1. `prepare_fragment` - scaffold and write the fragment (sphere.json +
+   content.md) from your fields and Markdown.
+2. `validate_fragment` - confirm it is structurally valid.
+3. `analyze_fragment_readiness` - review advisory gaps (these do not block
+   publishing; they are quality suggestions).
+4. `publish_fragment` - publish it to your node.
+
+`publish_fragment` runs the structural check itself as a hard gate: if the
+fragment is invalid, it lists the errors and never calls your node. On success
+it reports the node's canonical URL for the fragment, along with the readiness
+score and any advisory gaps to consider later. Publishing sends the fragment you
+choose - its manifest and content.md - to your own configured node, and nowhere
+else. (Media files are not sent yet; that is a planned follow-up.)
 
 ## Configuration
 
@@ -64,6 +92,8 @@ you configure, authenticated with the token you provide.
 - The local fragment tools never touch the network at all.
 - The Node tools call only your configured `sphere_node_url`. They never call a
   URL taken from fragment content, tool arguments, or any other source.
+- Publishing (`publish_fragment`) sends the fragment content you selected - its
+  manifest and content.md - only to your own configured Node, and nowhere else.
 - Your token is stored in the OS keychain by Claude Desktop and is sent only as a
   bearer token to your own Node.
 - Questions, support, or privacy requests: email hello@sphere.pub.
