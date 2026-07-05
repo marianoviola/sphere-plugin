@@ -34,7 +34,7 @@ function nodeDeps(): NodeClientDeps {
   return { config: readNodeConfig(), fetchFn: fetch as FetchFn };
 }
 
-const server = new McpServer({ name: "sphere-plugin", version: "1.0.0" });
+const server = new McpServer({ name: "sphere-plugin", version: "1.1.0" });
 
 // --- Local tier ---
 

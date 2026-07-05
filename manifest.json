@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "sphere-plugin",
   "display_name": "Sphere",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "icon": "assets/icon.png",
   "description": "Fragment Intelligence and authoring for agent-readable content, plus read-only tools for your own Sphere Node.",
   "long_description": "Sphere is a local Claude desktop extension. Four local tools validate fragments, analyze readiness, generate reports, and scaffold new fragments from your files, with zero configuration and no network access. Client tools talk to a Sphere Node you run yourself, using a URL and token you provide: three read-only owner reads, plus a guided publish that validates a prepared fragment before sending it to your node. The plugin hosts nothing and stores nothing.",
