@@ -17,7 +17,7 @@ export interface PrepareInput {
   accessPolicy?: AccessPolicy;
   pricePerAccess?: number;
   currency?: string;
-  payment?: { profile: string; method: string; endpoint: string };
+  payment?: FragmentManifest["access"]["payment"];
   canonicalUrl?: string;
   /** Typed external provenance copied through to the fragment manifest. */
   sources?: SourceRef[];

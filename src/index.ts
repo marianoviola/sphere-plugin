@@ -104,6 +104,17 @@ server.registerTool(
       access_policy: z.enum(["free", "metered", "paid", "sponsored"]).optional().describe("Defaults to free."),
       price_per_access: z.number().optional(),
       currency: z.string().optional(),
+      payment: z
+        .object({ profile: z.string(), method: z.string(), endpoint: z.string() })
+        .passthrough()
+        .optional()
+        .describe(
+          "Payment metadata for a paid/metered fragment's 402 challenge. Required (with a " +
+            "positive price_per_access) when access_policy is paid or metered. `profile` selects " +
+            "the challenge shape the node sends: \"x402\" or \"mpp\" get their real wire formats " +
+            "(x402 additionally reads network/asset/pay_to/amount/max_timeout_seconds off this " +
+            "object if present); any other profile keeps the generic shape.",
+        ),
       canonical_url: z.string().optional(),
       relations: z
         .array(z.object({ type: z.string(), target: z.string() }).passthrough())
@@ -128,6 +139,7 @@ server.registerTool(
         accessPolicy: args.access_policy,
         pricePerAccess: args.price_per_access,
         currency: args.currency,
+        payment: args.payment,
         canonicalUrl: args.canonical_url,
         relations: args.relations,
       }),

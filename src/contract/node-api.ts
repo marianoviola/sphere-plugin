@@ -94,7 +94,22 @@ export interface FragmentManifest {
     preview_chars?: number;
     price_per_access?: number;
     currency?: string;
-    payment?: { profile: string; method: string; endpoint: string; [k: string]: unknown };
+    payment?: {
+      profile: string;
+      method: string;
+      endpoint: string;
+      /** x402 (github.com/coinbase/x402): CAIP-2 network id, e.g. "eip155:8453". */
+      network?: string;
+      /** x402: the asset (token contract or symbol) payment is accepted in. */
+      asset?: string;
+      /** x402: the recipient address `accepts[].payTo`. */
+      pay_to?: string;
+      /** x402: override for `accepts[].amount` when price_per_access isn't already in the asset's atomic units. */
+      amount?: string;
+      /** x402: `accepts[].maxTimeoutSeconds`. */
+      max_timeout_seconds?: number;
+      [k: string]: unknown;
+    };
     [k: string]: unknown;
   };
   sources?: SourceRef[];

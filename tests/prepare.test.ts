@@ -56,6 +56,60 @@ describe("prepare_fragment", () => {
     expect(res.text).toContain("Validation: FAIL");
     expect(res.text).toMatch(/payment|price/);
   });
+
+  it("writes a valid paid fragment when payment metadata is provided", async () => {
+    const out = await mkdtemp(join(tmpdir(), "sphere-prepare-"));
+    const result = await prepareFragment({
+      outputDir: out,
+      title: "Paid Fragment",
+      content: "gated body",
+      today: "2026-02-03",
+      accessPolicy: "paid",
+      pricePerAccess: 0.02,
+      currency: "USD",
+      payment: { profile: "mpp", method: "PaymentAuth", endpoint: "https://pay.example.com/mpp" },
+    });
+    expect(result.validation.ok).toBe(true);
+
+    const manifest = JSON.parse(await readFile(join(result.dir, "sphere.json"), "utf8"));
+    expect(manifest.access.payment).toEqual({
+      profile: "mpp",
+      method: "PaymentAuth",
+      endpoint: "https://pay.example.com/mpp",
+    });
+  });
+
+  it("passes x402-specific payment fields through unchanged", async () => {
+    const out = await mkdtemp(join(tmpdir(), "sphere-prepare-"));
+    const result = await prepareFragment({
+      outputDir: out,
+      title: "X402 Fragment",
+      content: "gated body",
+      today: "2026-02-04",
+      accessPolicy: "metered",
+      pricePerAccess: 0.02,
+      currency: "USD",
+      payment: {
+        profile: "x402",
+        method: "PaymentAuth",
+        endpoint: "https://pay.example.com/x402",
+        network: "eip155:8453",
+        asset: "USDC",
+        pay_to: "0xabc123",
+      },
+    });
+    expect(result.validation.ok).toBe(true);
+
+    const manifest = JSON.parse(await readFile(join(result.dir, "sphere.json"), "utf8"));
+    expect(manifest.access.payment).toEqual({
+      profile: "x402",
+      method: "PaymentAuth",
+      endpoint: "https://pay.example.com/x402",
+      network: "eip155:8453",
+      asset: "USDC",
+      pay_to: "0xabc123",
+    });
+  });
 });
 
 describe("typed relations validation", () => {
