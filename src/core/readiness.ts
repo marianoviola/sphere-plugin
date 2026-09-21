@@ -3,7 +3,7 @@
 // with a severity and a one-line suggestion. Operates on the manifest plus the
 // optional content.md text. No network.
 
-import type { FragmentManifest } from "../contract/node-api";
+import type { FragmentManifest } from "@sphere-pub/node/contract";
 
 export type Severity = "info" | "low" | "medium" | "high";
 

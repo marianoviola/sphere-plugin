@@ -4,7 +4,7 @@
 
 import { readFile, readdir, stat } from "node:fs/promises";
 import { join, basename } from "node:path";
-import type { FragmentManifest } from "../contract/node-api";
+import type { FragmentManifest } from "@sphere-pub/node/contract";
 
 export interface LoadedFragment {
   /** Directory that holds sphere.json. */

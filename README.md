@@ -114,9 +114,14 @@ and no native dependencies.
 
 ## The fragment contract
 
-The fragment schema and the Node response types are vendored from the
-`sphere-node` repository into `src/contract/`. That repository is the source of
-truth for the contract; this plugin consumes it and does not redefine it.
+The fragment schema and the Node response types come from the
+[`@sphere-pub/node`](https://github.com/marianoviola/sphere-node) package: the
+schema at `@sphere-pub/node/spec/fragment.schema.json` and the types at
+`@sphere-pub/node/contract`. It is a build-time dependency only — the schema is
+bundled into `server/index.js`, and nothing from the node runs inside the
+plugin. That package is the source of truth for the contract; this plugin
+consumes it and does not redefine it (a test fails if a vendored copy
+reappears under `src/contract/`).
 
 ## License
 
