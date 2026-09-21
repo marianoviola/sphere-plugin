@@ -1,10 +1,11 @@
-// Structural validation of a fragment manifest against the vendored schema.
+// Structural validation of a fragment manifest against the contract schema
+// shipped by @sphere-pub/node (the source of truth; nothing is vendored here).
 // Pass/fail plus a flat list of structural errors. Hard errors only; advisory
 // gaps live in readiness.ts.
 
-import schema from "../contract/fragment.schema.json";
+import schema from "@sphere-pub/node/spec/fragment.schema.json";
 import { validate as validateAgainstSchema, type JsonSchema } from "./schema";
-import type { FragmentManifest } from "../contract/node-api";
+import type { FragmentManifest } from "@sphere-pub/node/contract";
 
 export interface ValidationResult {
   ok: boolean;

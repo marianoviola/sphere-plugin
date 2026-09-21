@@ -4,7 +4,7 @@
 
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import type { AccessPolicy, FragmentManifest, RelationEdge, SourceRef } from "../contract/node-api";
+import type { AccessPolicy, FragmentManifest, RelationEdge, SourceRef } from "@sphere-pub/node/contract";
 import { validateManifest, type ValidationResult } from "./validate";
 
 export interface PrepareInput {
